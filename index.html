@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bataan National High School Lost & Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cork: #b8895f;
+    --cork-dark: #9c6f48;
+    --wood: #5c3d2e;
+    --note-lost: #f7c9c9;
+    --note-lost-edge: #e8a3a3;
+    --note-found: #f5e6a3;
+    --note-found-edge: #e0cd7a;
+    --tape: rgba(232, 224, 208, 0.75);
+    --pin-red: #c94b4b;
+    --pin-green: #4c9f70;
+    --pin-blue: #4b7fc9;
+    --ink: #3a2a1e;
+    --paper: #fdf8ee;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05), transparent 40%),
+      repeating-linear-gradient(45deg, var(--cork) 0px, var(--cork) 2px, var(--cork-dark) 2px, var(--cork-dark) 4px);
+    background-color: var(--cork);
+    min-height:100vh;
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--wood);
+    padding:28px 20px 34px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    position:relative;
+  }
+  header h1{
+    font-family:'Kalam',cursive;
+    color:var(--paper);
+    font-size:2.4rem;
+    margin:0;
+    letter-spacing:1px;
+    transform:rotate(-1deg);
+  }
+  header p{
+    color:#d8c4ae;
+    font-size:0.9rem;
+    margin:6px 0 0;
+  }
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:24px auto 0;
+    flex-wrap:wrap;
+    padding:0 16px;
+  }
+  .tab-btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:0.85rem;
+    padding:9px 18px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    background:var(--paper);
+    color:var(--ink);
+    box-shadow:0 2px 5px rgba(0,0,0,0.25);
+    transition:transform 0.15s ease;
+  }
+  .tab-btn:hover{transform:translateY(-2px);}
+  .tab-btn.active{background:var(--pin-red);color:white;}
+  .action-row{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin:20px auto 10px;
+    flex-wrap:wrap;
+  }
+  .big-btn{
+    font-family:'Kalam',cursive;
+    font-size:1.1rem;
+    padding:12px 26px;
+    border-radius:8px;
+    border:2px dashed rgba(0,0,0,0.2);
+    cursor:pointer;
+    font-weight:700;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+  }
+  .big-btn.lost{background:var(--note-lost);color:#7a2b2b;}
+  .big-btn.found{background:var(--note-found);color:#7a6a1f;}
+
+  .board{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    justify-content:center;
+    padding:30px 20px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .empty-msg{
+    font-family:'Kalam',cursive;
+    color:var(--paper);
+    font-size:1.2rem;
+    text-align:center;
+    width:100%;
+    margin-top:40px;
+  }
+  .note{
+    width:230px;
+    padding:18px 16px 22px;
+    position:relative;
+    box-shadow:2px 4px 10px rgba(0,0,0,0.35);
+    font-family:'Kalam',cursive;
+  }
+  .note.lost{background:var(--note-lost);border-bottom:6px solid var(--note-lost-edge);}
+  .note.found{background:var(--note-found);border-bottom:6px solid var(--note-found-edge);}
+  .note:nth-child(3n){transform:rotate(-2.5deg);}
+  .note:nth-child(3n+1){transform:rotate(2deg);}
+  .note:nth-child(3n+2){transform:rotate(-1deg);}
+  .pin{
+    width:16px;height:16px;border-radius:50%;
+    position:absolute;top:-8px;left:calc(50% - 8px);
+    box-shadow:0 3px 4px rgba(0,0,0,0.4);
+    border:2px solid rgba(255,255,255,0.5);
+  }
+  .note.lost .pin{background:var(--pin-red);}
+  .note.found .pin{background:var(--pin-blue);}
+  .note.claimed .pin{background:var(--pin-green);}
+  .tape{
+    position:absolute;
+    top:-10px;right:10px;
+    width:60px;height:22px;
+    background:var(--tape);
+    transform:rotate(8deg);
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+  .note h3{margin:10px 0 4px;font-size:1.25rem;}
+  .note .cat{
+    display:inline-block;
+    font-family:'Inter',sans-serif;
+    font-size:0.65rem;
+    font-weight:700;
+    text-transform:uppercase;
+    background:rgba(0,0,0,0.12);
+    padding:2px 7px;
+    border-radius:10px;
+    margin-bottom:6px;
+  }
+  .note p{margin:4px 0;font-size:0.95rem;line-height:1.3;}
+  .note .meta{font-family:'Inter',sans-serif;font-size:0.72rem;color:#5a4a3a;margin-top:8px;}
+  .note .status-badge{
+    font-family:'Inter',sans-serif;
+    font-size:0.68rem;font-weight:700;
+    color:white;background:var(--pin-green);
+    padding:2px 8px;border-radius:8px;
+    display:inline-block;margin-top:6px;
+  }
+  .note button.claim-btn{
+    margin-top:10px;
+    font-family:'Inter',sans-serif;
+    font-size:0.75rem;font-weight:600;
+    padding:6px 12px;border:none;border-radius:5px;
+    background:var(--wood);color:var(--paper);cursor:pointer;
+  }
+  .matches{margin-top:8px;font-family:'Inter',sans-serif;font-size:0.72rem;color:#5a4a3a;}
+  .matches b{color:var(--pin-green);}
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,12,8,0.55);
+    display:none;align-items:center;justify-content:center;z-index:50;
+    padding:16px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--paper);
+    width:100%;max-width:420px;
+    border-radius:10px;
+    padding:24px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.4);
+    max-height:88vh;overflow-y:auto;
+  }
+  .modal h2{font-family:'Kalam',cursive;margin-top:0;color:var(--wood);}
+  .modal label{
+    display:block;font-size:0.78rem;font-weight:600;
+    margin:12px 0 4px;color:#5a4a3a;
+  }
+  .modal input, .modal select, .modal textarea{
+    width:100%;padding:9px 10px;border-radius:6px;
+    border:1px solid #d8c4ae;font-family:'Inter',sans-serif;font-size:0.9rem;
+  }
+  .modal textarea{resize:vertical;min-height:60px;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions button{
+    flex:1;padding:10px;border-radius:6px;border:none;
+    font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .btn-submit{background:var(--pin-green);color:white;}
+  .btn-cancel{background:#e2d8c8;color:var(--ink);}
+  .close-x{
+    position:absolute;top:14px;right:18px;cursor:pointer;
+    font-size:1.3rem;color:#8a7a6a;background:none;border:none;
+  }
+  .modal{position:relative;}
+  .error-text{color:#b02b2b;font-size:0.8rem;margin-top:6px;}
+  .success-text{color:#2b7a45;font-size:0.85rem;margin-top:6px;font-weight:600;}
+
+  [hidden]{display:none!important}
+  #sessionBar{background:#3a2a1e;color:#fdf8ee;font:600 .82rem Inter,sans-serif;padding:8px 16px;display:flex;justify-content:flex-end;align-items:center;gap:16px;flex-wrap:wrap}
+  #sessionBar button{background:none;border:0;color:#f5e6a3;font:inherit;cursor:pointer;text-decoration:underline;padding:4px}
+  #loginView{max-width:640px;margin:0 auto;padding:0 16px}
+  #loginView .prompt{font-family:'Kalam',cursive;color:var(--paper);font-size:1.4rem;text-align:center;margin:28px 0 8px;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+  #loginView .roles{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 8px}
+  #loginView .role{position:relative;border:0;text-align:left;cursor:pointer;padding:22px 16px 18px;font-family:'Kalam',cursive;color:var(--ink);box-shadow:2px 4px 10px rgba(0,0,0,.35);transition:transform .15s ease}
+  #loginView .role.student{background:var(--note-found);border-bottom:6px solid var(--note-found-edge);transform:rotate(-1.5deg)}
+  #loginView .role.admin{background:var(--note-lost);border-bottom:6px solid var(--note-lost-edge);transform:rotate(1.5deg)}
+  #loginView .role:hover,#loginView .role[aria-pressed="true"]{transform:rotate(0) translateY(-3px)}
+  #loginView .role[aria-pressed="true"],#loginView .role:focus-visible{outline:3px solid var(--paper);outline-offset:2px}
+  #loginView .role i{position:absolute;top:-8px;left:calc(50% - 8px);width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.5);box-shadow:0 3px 4px rgba(0,0,0,.4)}
+  #loginView .student i{background:var(--pin-blue)} #loginView .admin i{background:var(--pin-red)}
+  #loginView .role b{display:block;font-size:1.3rem}
+  #loginView .role span{display:block;font-family:'Inter',sans-serif;font-size:.78rem;margin-top:4px;color:#5a4a3a;line-height:1.35}
+  #loginView .panel{position:relative;background:var(--paper);border-radius:10px;padding:26px 22px 22px;margin-top:26px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+  #loginView .panel > i{position:absolute;top:-11px;left:calc(50% - 32px);width:64px;height:22px;background:var(--tape);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  #loginView h2{font-family:'Kalam',cursive;color:var(--wood);margin:0 0 4px}
+  #loginView .sub{margin:0 0 6px;font-size:.85rem;color:#5a4a3a}
+  #loginView label{display:block;font-size:.78rem;font-weight:600;margin:14px 0 4px;color:#5a4a3a}
+  #loginView input[type=text],#loginView input[type=password]{width:100%;padding:11px 12px;border-radius:6px;border:1px solid #d8c4ae;font:inherit;font-size:1rem;background:#fff;color:var(--ink)}
+  #loginView input:focus-visible,#loginView button:focus-visible,#adminView button:focus-visible,#sessionBar button:focus-visible{outline:3px solid var(--pin-blue);outline-offset:1px}
+  #loginView .pw{position:relative}
+  #loginView .pw input{padding-right:64px}
+  #loginView .pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--wood);font-weight:600;font-size:.8rem;cursor:pointer;padding:8px}
+  #loginView .drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 12px;border:2px dashed #c9b296;border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-size:.85rem;color:#5a4a3a;margin:0}
+  #loginView .drop:hover,#loginView .drop:focus-within{border-color:var(--wood)}
+  #loginView .drop input{position:absolute;opacity:0;width:1px;height:1px}
+  #loginView .drop strong{color:var(--wood);font-size:.95rem}
+  #loginView .preview{margin-top:10px;text-align:center}
+  #loginView .preview img{max-width:100%;max-height:220px;border-radius:6px;border:1px solid #d8c4ae;background:#fff}
+  #loginView .preview button{margin-top:6px;border:0;background:none;color:#b02b2b;text-decoration:underline;cursor:pointer;font-size:.8rem}
+  #loginView .hint{font-size:.75rem;color:#7a6a5a;margin:6px 0 0}
+  #loginView .error{min-height:1.2em;margin:12px 0 0;color:#b02b2b;font-size:.85rem;font-weight:600}
+  #loginView .submit{width:100%;margin-top:8px;padding:13px;border:0;border-radius:6px;background:var(--pin-green);color:#fff;font:600 1rem Inter,sans-serif;cursor:pointer}
+  #loginView .submit:disabled{opacity:.6;cursor:wait}
+  #adminView{max-width:900px;margin:0 auto;padding:24px 16px}
+  #adminView h2{font-family:'Kalam',cursive;color:var(--paper);font-size:1.6rem;margin:0 0 4px}
+  #adminView .lead{color:#f3e6d3;font-size:.85rem;margin:0 0 16px}
+  #adminView .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+  #adminView .card{background:var(--paper);border-radius:10px;padding:14px;box-shadow:2px 4px 10px rgba(0,0,0,.35)}
+  #adminView .card img{width:100%;height:150px;object-fit:cover;border-radius:6px;cursor:zoom-in;background:#eee}
+  #adminView .card h3{margin:10px 0 2px;font-size:1rem}
+  #adminView .card small{color:#7a6a5a;display:block}
+  #adminView .card button{margin-top:10px;padding:8px 12px;border:0;border-radius:6px;background:var(--pin-red);color:#fff;font-weight:600;cursor:pointer}
+  @media (max-width:520px){#loginView .roles{gap:16px}#loginView .role{padding:20px 12px 14px}#loginView .role b{font-size:1.1rem}#loginView .role span{font-size:.72rem}}
+  @media (prefers-reduced-motion:reduce){#loginView .role{transition:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📌 Bataan National High School Lost & Found</h1>
+  <p>Pin a note. Find your stuff.</p>
+</header>
+
+<div id="sessionBar" hidden>
+  <span id="who"></span>
+  <button type="button" id="switchView" hidden></button>
+  <button type="button" id="logout">Log out</button>
+</div>
+
+<div id="loginView">
+  <p class="prompt">Who's logging in?</p>
+  <div class="roles" role="group" aria-label="Choose your role">
+    <button type="button" class="role student" data-role="student" aria-pressed="false" aria-controls="studentPanel"><i></i><b>Student</b><span>Use your name and a photo of your school ID.</span></button>
+    <button type="button" class="role admin" data-role="admin" aria-pressed="false" aria-controls="adminPanel"><i></i><b>Admin / Moderator</b><span>Use the admin password.</span></button>
+  </div>
+
+  <section class="panel" id="studentPanel" hidden>
+    <i></i>
+    <h2>Student log in</h2>
+    <p class="sub">Your ID photo is only shown to moderators.</p>
+    <form id="studentForm" novalidate>
+      <label for="stuName">Full name</label>
+      <input type="text" id="stuName" autocomplete="name" placeholder="e.g. Maria Santos">
+      <label for="idPhoto">School ID photo</label>
+      <label class="drop" id="drop" for="idPhoto">
+        <strong>Tap to take or choose a photo</strong>
+        <span>JPG, PNG or WebP · max 5 MB</span>
+        <input type="file" id="idPhoto" accept="image/jpeg,image/png,image/webp">
+      </label>
+      <div class="preview" id="idPreview" hidden>
+        <img id="idPreviewImg" alt="Preview of your school ID">
+        <button type="button" id="removeId">Remove and choose another</button>
+      </div>
+      <p class="hint">Check that your name and photo are readable before you continue.</p>
+      <p class="error" id="studentError" role="alert"></p>
+      <button class="submit" type="submit">Log in as student</button>
+    </form>
+  </section>
+
+  <section class="panel" id="adminPanel" hidden>
+    <i></i>
+    <h2>Admin / Moderator log in</h2>
+    <p class="sub">Moderators review student sign-ins.</p>
+    <form id="adminForm" novalidate>
+      <label for="adminPw">Password</label>
+      <div class="pw">
+        <input type="password" id="adminPw" autocomplete="current-password">
+        <button type="button" id="togglePw" aria-label="Show password">Show</button>
+      </div>
+      <p class="error" id="adminError" role="alert"></p>
+      <button class="submit" type="submit">Log in as moderator</button>
+    </form>
+  </section>
+</div>
+
+<div id="adminView" hidden>
+  <h2>Moderator dashboard</h2>
+  <p class="lead">Every student sign-in, from any device.</p>
+  <p class="lead" id="noStudents" hidden>No students have logged in yet.</p>
+  <div class="grid" id="studentList"></div>
+</div>
+
+<div id="appView" hidden>
+
+<div class="tabs">
+  <button class="tab-btn active" data-filter="all">All Notes</button>
+  <button class="tab-btn" data-filter="lost">Lost Items</button>
+  <button class="tab-btn" data-filter="found">Found Items</button>
+  <button class="tab-btn" data-filter="claimed">Claimed</button>
+</div>
+
+<div class="action-row">
+  <button class="big-btn lost" id="reportLostBtn">+ I Lost Something</button>
+  <button class="big-btn found" id="reportFoundBtn">+ I Found Something</button>
+</div>
+<div class="board" id="board"></div>
+</div><!-- /appView -->
+
+<!-- Report Modal -->
+<div class="overlay" id="reportOverlay">
+  <div class="modal">
+    <button class="close-x" id="closeReport">×</button>
+    <h2 id="reportTitle">Report an Item</h2>
+    <form id="reportForm">
+      <label>Item name</label>
+      <input type="text" id="f-name" required placeholder="e.g. Blue water bottle">
+
+      <label>Category</label>
+      <select id="f-category">
+        <option>ID / Cards</option>
+        <option>Gadget</option>
+        <option>Wallet / Bag</option>
+        <option>Clothing / Accessory</option>
+        <option>Book / Notebook</option>
+        <option>Other</option>
+      </select>
+
+      <label>Description</label>
+      <textarea id="f-desc" required placeholder="Color, brand, distinguishing marks..."></textarea>
+
+      <label>Location</label>
+      <input type="text" id="f-location" required placeholder="e.g. Library, 2nd floor">
+
+      <label>Photo (optional, helps with matching)</label>
+      <input type="file" id="f-photo" accept="image/*">
+      <div id="photo-preview-wrap" style="display:none;margin-top:8px;">
+        <img id="photo-preview" style="max-width:100%;max-height:140px;border-radius:6px;border:1px solid #d8c4ae;">
+        <button type="button" id="removePhoto" style="margin-top:6px;font-size:0.75rem;background:none;border:none;color:#b02b2b;cursor:pointer;text-decoration:underline;">Remove photo</button>
+      </div>
+
+      <label>Your contact info</label>
+      <input type="text" id="f-contact" required placeholder="Messenger / email / number">
+
+      <div id="verify-fields" style="display:none;">
+        <label>Verification question (only the real owner should know this)</label>
+        <input type="text" id="f-vq" placeholder="e.g. What's written inside the front cover?">
+        <label>Correct answer</label>
+        <input type="text" id="f-va" placeholder="Answer the claimant must give">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="cancelReport">Cancel</button>
+        <button type="submit" class="btn-submit">Pin it</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Claim Modal -->
+<div class="overlay" id="claimOverlay">
+  <div class="modal">
+    <button class="close-x" id="closeClaim">×</button>
+    <h2>Verify Ownership</h2>
+    <p id="claimQuestion" style="font-family:'Inter',sans-serif;font-weight:600;"></p>
+    <label>Your answer</label>
+    <input type="text" id="claim-answer">
+    <div id="claim-feedback"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="cancelClaim">Cancel</button>
+      <button type="button" class="btn-submit" id="submitClaim">Submit Answer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo Lightbox -->
+<div class="overlay" id="photoOverlay">
+  <div style="position:relative;max-width:90vw;max-height:90vh;">
+    <button class="close-x" id="closePhoto" style="position:absolute;top:-38px;right:0;color:white;font-size:1.8rem;">×</button>
+    <img id="lightboxImg" style="max-width:90vw;max-height:85vh;border-radius:8px;display:block;">
+  </div>
+</div>
+
+<script>
+// ---- Photo handling ----
+// Images are resized down and re-encoded as compressed JPEG before storing,
+// since localStorage has a small size limit (~5-10MB total) and raw photos
+// from phone cameras can be several MB each on their own.
+let pendingPhotoDataUrl = null;
+
+function compressImage(file, maxDimension, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > height && width > maxDimension){
+          height = Math.round(height * (maxDimension / width));
+          width = maxDimension;
+        } else if(height > maxDimension){
+          width = Math.round(width * (maxDimension / height));
+          height = maxDimension;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('f-photo').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    pendingPhotoDataUrl = await compressImage(file, 500, 0.7);
+    document.getElementById('photo-preview').src = pendingPhotoDataUrl;
+    document.getElementById('photo-preview-wrap').style.display = 'block';
+  }catch(err){
+    showBanner('⚠ Could not process that image', true);
+  }
+});
+
+document.getElementById('removePhoto').addEventListener('click', () => {
+  pendingPhotoDataUrl = null;
+  document.getElementById('f-photo').value = '';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+});
+
+// ---- Lightbox ----
+const photoOverlay = document.getElementById('photoOverlay');
+document.getElementById('closePhoto').addEventListener('click', () => photoOverlay.classList.remove('show'));
+photoOverlay.addEventListener('click', (e) => { if(e.target === photoOverlay) photoOverlay.classList.remove('show'); });
+
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
+  photoOverlay.classList.add('show');
+}
+
+// ---- Lost item self-resolution ----
+// Since a lost item isn't "claimed" by someone else, the original poster
+// can mark it resolved themselves once they recover it — this just moves
+// it into the Claimed tab and takes it off the active board.
+function removeLostItem(id){
+  const item = items.find(i => i.id === id);
+  if(!item) return;
+  const confirmed = confirm(`Mark "${item.name}" as found and remove it from the active board?`);
+  if(!confirmed) return;
+  item.status = 'claimed';
+  saveItems();
+  render();
+  showBanner('✓ Removed from active board', false);
+}
+
+// ---- Data layer ----
+// Items are stored as one array under a single shared key, since storage
+// calls should batch related data rather than one key per item.
+const STORAGE_KEY = 'lost_and_found_items';
+let items = [];
+let currentFilter = 'all';
+let pendingType = 'lost';
+let claimingItemId = null;
+let storageWorks = true;
+
+// Some browsers (Safari private mode, some file:// setups) expose localStorage
+// but throw on write. This checks for real, and warns instead of failing silently.
+function checkStorage(){
+  try{
+    const testKey = '__storage_test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function showBanner(msg, isError){
+  let banner = document.getElementById('save-banner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'save-banner';
+    banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);' +
+      'padding:10px 20px;border-radius:8px;font-family:Inter,sans-serif;font-size:0.85rem;' +
+      'font-weight:600;color:white;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s;';
+    document.body.appendChild(banner);
+  }
+  banner.style.background = isError ? '#c94b4b' : '#4c9f70';
+  banner.textContent = msg;
+  banner.style.opacity = '1';
+  clearTimeout(banner._t);
+  banner._t = setTimeout(() => { banner.style.opacity = '0'; }, isError ? 6000 : 1800);
+}
+
+async function loadItems(){
+  storageWorks = checkStorage();
+  if(!storageWorks){
+    showBanner('⚠ This browser is blocking saved data (private/incognito mode?).', true);
+  }
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    items = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    items = [];
+  }
+  render();
+}
+
+async function saveItems(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    showBanner('✓ Saved', false);
+  }catch(e){
+    console.error('Could not save to local storage', e);
+    showBanner('⚠ Could not save — storage may be full or blocked.', true);
+  }
+}
+
+// ---- Simple matching logic ----
+// A lost item is "matched" against found items in the same category
+// that share at least one meaningful word in their descriptions.
+function findMatches(item){
+  const otherType = item.type === 'lost' ? 'found' : 'lost';
+  const words = item.description.toLowerCase().split(/\W+/).filter(w => w.length > 3);
+  return items.filter(other => {
+    if(other.type !== otherType || other.status === 'claimed') return false;
+    if(other.category !== item.category) return false;
+    const otherWords = other.description.toLowerCase().split(/\W+/);
+    return words.some(w => otherWords.includes(w));
+  });
+}
+
+// ---- Rendering ----
+function render(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  let list = items.slice().reverse();
+  if(currentFilter === 'lost') list = list.filter(i => i.type === 'lost' && i.status !== 'claimed');
+  if(currentFilter === 'found') list = list.filter(i => i.type === 'found' && i.status !== 'claimed');
+  if(currentFilter === 'claimed') list = list.filter(i => i.status === 'claimed');
+  if(currentFilter === 'all') list = list.filter(i => i.status !== 'claimed');
+
+  if(list.length === 0){
+    board.innerHTML = '<div class="empty-msg">No notes here yet. Be the first to pin one!</div>';
+    return;
+  }
+
+  list.forEach(item => {
+    const note = document.createElement('div');
+    note.className = 'note ' + item.type + (item.status === 'claimed' ? ' claimed' : '');
+    const matches = item.status !== 'claimed' ? findMatches(item) : [];
+
+    note.innerHTML = `
+      <div class="pin"></div>
+      <div class="tape"></div>
+      <span class="cat">${item.category}</span>
+      <h3>${escapeHtml(item.name)}</h3>
+      ${item.photo ? `<img src="${item.photo}" class="note-photo" data-src="${item.photo}" style="width:100%;max-height:130px;object-fit:cover;border-radius:5px;margin:6px 0;cursor:pointer;border:1px solid rgba(0,0,0,0.15);">` : ''}
+      <p>${escapeHtml(item.description)}</p>
+      <div class="meta">📍 ${escapeHtml(item.location)} · ${item.date}</div>
+      ${item.status === 'claimed' ? `<div class="status-badge">${item.type === 'lost' ? '✓ Found' : '✓ Claimed'}</div>` : ''}
+      ${matches.length > 0 && item.status !== 'claimed' ? `<div class="matches"><b>${matches.length} possible match${matches.length>1?'es':''}</b> in the other list</div>` : ''}
+      ${item.type === 'found' && item.status !== 'claimed' ? `<button class="claim-btn" data-id="${item.id}">This is mine</button>` : ''}
+      ${item.type === 'lost' && item.status !== 'claimed' ? `<button class="claim-btn remove-btn" data-id="${item.id}">✓ Found it — remove post</button>` : ''}
+    `;
+    board.appendChild(note);
+  });
+
+  document.querySelectorAll('.claim-btn:not(.remove-btn)').forEach(btn => {
+    btn.addEventListener('click', () => openClaim(btn.dataset.id));
+  });
+  document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeLostItem(btn.dataset.id);
+    });
+  });
+  document.querySelectorAll('.note-photo').forEach(img => {
+    img.addEventListener('click', () => openLightbox(img.dataset.src));
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ---- Tabs ----
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+// ---- Report modal ----
+const reportOverlay = document.getElementById('reportOverlay');
+document.getElementById('reportLostBtn').addEventListener('click', () => openReport('lost'));
+document.getElementById('reportFoundBtn').addEventListener('click', () => openReport('found'));
+document.getElementById('closeReport').addEventListener('click', () => reportOverlay.classList.remove('show'));
+document.getElementById('cancelReport').addEventListener('click', () => reportOverlay.classList.remove('show'));
+
+function openReport(type){
+  pendingType = type;
+  pendingPhotoDataUrl = null;
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  document.getElementById('reportTitle').textContent = type === 'lost' ? 'Report a Lost Item' : 'Report a Found Item';
+  document.getElementById('verify-fields').style.display = type === 'found' ? 'block' : 'none';
+  document.getElementById('reportForm').reset();
+  reportOverlay.classList.add('show');
+}
+
+document.getElementById('reportForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const newItem = {
+    id: 'item_' + Date.now(),
+    type: pendingType,
+    name: document.getElementById('f-name').value.trim(),
+    category: document.getElementById('f-category').value,
+    description: document.getElementById('f-desc').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+    contact: document.getElementById('f-contact').value.trim(),
+    date: new Date().toLocaleDateString(),
+    status: 'open',
+    verifyQ: pendingType === 'found' ? document.getElementById('f-vq').value.trim() : null,
+    verifyA: pendingType === 'found' ? document.getElementById('f-va').value.trim().toLowerCase() : null,
+    photo: pendingPhotoDataUrl
+  };
+  items.push(newItem);
+  await saveItems();
+  reportOverlay.classList.remove('show');
+  render();
+});
+
+// ---- Claim modal ----
+const claimOverlay = document.getElementById('claimOverlay');
+document.getElementById('closeClaim').addEventListener('click', () => claimOverlay.classList.remove('show'));
+document.getElementById('cancelClaim').addEventListener('click', () => claimOverlay.classList.remove('show'));
+
+function openClaim(id){
+  claimingItemId = id;
+  const item = items.find(i => i.id === id);
+  document.getElementById('claimQuestion').textContent = item.verifyQ
+    ? 'Q: ' + item.verifyQ
+    : 'No verification question was set for this item — describe it to the finder directly using the contact info once confirmed.';
+  document.getElementById('claim-answer').value = '';
+  document.getElementById('claim-feedback').innerHTML = '';
+  claimOverlay.classList.add('show');
+}
+
+document.getElementById('submitClaim').addEventListener('click', async () => {
+  const item = items.find(i => i.id === claimingItemId);
+  const answer = document.getElementById('claim-answer').value.trim().toLowerCase();
+  const feedback = document.getElementById('claim-feedback');
+
+  if(!item.verifyA){
+    feedback.innerHTML = '<p class="success-text">No question set — reach out using the finder\'s contact info to arrange pickup.</p>';
+    return;
+  }
+
+  if(answer === item.verifyA){
+    items = items.filter(i => i.id !== claimingItemId);
+    await saveItems();
+    feedback.innerHTML = `<p class="success-text">✓ Verified! Contact the finder: ${escapeHtml(item.contact)}</p>`;
+    render();
+  } else {
+    feedback.innerHTML = '<p class="error-text">That doesn\'t match. Try again or contact campus admin if you believe this is your item.</p>';
+  }
+});
+
+// ---- Init ----
+loadItems();
+</script>
+
+<script>
+// ===== Login & roles =====
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const SESSION_KEY = 'lf_session', STUDENTS_KEY = 'lf_students';
+  const MAX = 5 * 1024 * 1024, TYPES = ['image/jpeg','image/png','image/webp'];
+  const views = { login: $('loginView'), admin: $('adminView'), app: $('appView') };
+  let adminOnBoard = false, previewUrl = null;
+
+  const getSession = () => { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e){ return null; } };
+  const setSession = (s) => { try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch(e){} window._lfSession = s; };
+
+  function route(){
+    const s = getSession();
+    let name = 'login';
+    if(s) name = (s.role === 'admin' && !adminOnBoard) ? 'admin' : 'app';
+    for(const k in views) views[k].hidden = k !== name;
+    $('sessionBar').hidden = !s;
+    $('switchView').hidden = !(s && s.role === 'admin');
+    if(s){
+      $('who').textContent = s.role === 'admin' ? 'Moderator' : s.name;
+      $('switchView').textContent = name === 'admin' ? 'Open the board' : 'Back to dashboard';
+    }
+    if(name === 'admin') renderStudents();
+    window.scrollTo(0, 0);
+  }
+
+  // ---- Role picker ----
+  function chooseRole(role){
+    document.querySelectorAll('#loginView .role').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role)));
+    $('studentPanel').hidden = role !== 'student';
+    $('adminPanel').hidden = role !== 'admin';
+    (role === 'student' ? $('studentPanel') : $('adminPanel')).scrollIntoView({behavior:'smooth', block:'nearest'});
+    (role === 'student' ? $('stuName') : $('adminPw')).focus({preventScroll:true});
+  }
+  document.querySelectorAll('#loginView .role').forEach(b => b.addEventListener('click', () => chooseRole(b.dataset.role)));
+
+  // ---- ID preview ----
+  function clearPreview(){
+    if(previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null; $('idPhoto').value = '';
+    $('idPreview').hidden = true; $('drop').hidden = false;
+  }
+  $('idPhoto').addEventListener('change', () => {
+    const f = $('idPhoto').files[0], err = $('studentError');
+    err.textContent = '';
+    if(!f) return;
+    if(!TYPES.includes(f.type)){ clearPreview(); err.textContent = "That file isn't a JPG, PNG or WebP image."; return; }
+    if(f.size > MAX){ clearPreview(); err.textContent = 'That photo is over 5 MB. Choose a smaller one.'; return; }
+    if(previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(f);
+    $('idPreviewImg').src = previewUrl;
+    $('idPreview').hidden = false; $('drop').hidden = true;
+  });
+  $('removeId').addEventListener('click', clearPreview);
+
+  // ---- Student login ----
+  $('studentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = $('stuName').value.trim(), file = $('idPhoto').files[0], err = $('studentError'), btn = e.submitter;
+    if(name.length < 2){ err.textContent = 'Enter your full name.'; $('stuName').focus(); return; }
+    if(!file){ err.textContent = 'Add a photo of your school ID.'; return; }
+    btn.disabled = true; err.textContent = '';
+    try{
+      const photo = await compressImage(file, 600, 0.7);   // reuses the board's image compressor
+      const r = await fetch('/api/login/student', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, photo})});
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(d.error || 'Something went wrong. Try again.');
+      setSession({ role:'student', name });
+      $('studentForm').reset(); clearPreview();
+      route();
+    }catch(x){
+      err.textContent = x.message || "Couldn't send your ID. Try again.";
+    }
+    btn.disabled = false;
+  });
+
+  // ---- Admin login ----
+  $('adminForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pw = $('adminPw').value, err = $('adminError'), btn = e.submitter;
+    if(!pw){ err.textContent = 'Enter the admin password.'; $('adminPw').focus(); return; }
+    btn.disabled = true; err.textContent = '';
+    try{
+      const r = await fetch('/api/login/admin', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})});
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(d.error || 'Something went wrong. Try again.');
+      $('adminPw').value = ''; adminOnBoard = false;
+      setSession({ role:'admin', token:d.token });
+      route();
+    }catch(x){ err.textContent = x.message; $('adminPw').select(); }
+    btn.disabled = false;
+  });
+  $('togglePw').addEventListener('click', () => {
+    const show = $('adminPw').type === 'password';
+    $('adminPw').type = show ? 'text' : 'password';
+    $('togglePw').textContent = show ? 'Hide' : 'Show';
+    $('togglePw').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+
+  // ---- Dashboard ----
+  const authHeader = () => ({ Authorization: 'Bearer ' + ((getSession() || {}).token || '') });
+  let renderRun = 0;
+  async function renderStudents(){
+    const run = ++renderRun, grid = $('studentList'), none = $('noStudents');
+    grid.innerHTML = ''; none.hidden = true;
+    let list;
+    try{
+      const r = await fetch('/api/students', {headers: authHeader()});
+      if(r.status === 401){ $('logout').click(); return; }
+      list = await r.json();
+    }catch(x){
+      none.textContent = "Couldn't load sign-ins. Refresh to try again."; none.hidden = false; return;
+    }
+    if(run !== renderRun) return;
+    none.textContent = 'No students have logged in yet.'; none.hidden = list.length > 0;
+    list.forEach(s => {
+      const card = document.createElement('div'); card.className = 'card';
+      const img = document.createElement('img'); img.alt = 'School ID submitted by ' + s.name;
+      fetch('/api/students/' + s.id + '/photo', {headers: authHeader()}).then(r => r.json()).then(d => {
+        img.src = d.photo; img.addEventListener('click', () => openLightbox(d.photo));
+      }).catch(() => {});
+      const h = document.createElement('h3'); h.textContent = s.name;
+      const t = document.createElement('small'); t.textContent = new Date(s.at).toLocaleString();
+      const b = document.createElement('button'); b.textContent = 'Remove record';
+      b.addEventListener('click', async () => {
+        if(!confirm('Remove the sign-in record for ' + s.name + '?')) return;
+        await fetch('/api/students/' + s.id, {method:'DELETE', headers: authHeader()});
+        renderStudents();
+      });
+      card.append(img, h, t, b); grid.append(card);
+    });
+  }
+
+  // ---- Session bar ----
+  $('switchView').addEventListener('click', () => { adminOnBoard = !adminOnBoard; route(); });
+  $('logout').addEventListener('click', () => {
+    try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+    window._lfSession = null; adminOnBoard = false; route();
+  });
+
+  route();
+})();
+</script>
+</body>
+</html>
